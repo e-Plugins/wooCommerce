@@ -1,0 +1,67 @@
+********************************************************************************
+  Installation instructions for:
+********************************************************************************
+
+  Wordpress + Woocommerce plugin
+
+********************************************************************************
+
+-- Requirements ----------------------------------------------------------------
+
+PHP 5.6+
+Wordpress 4.9.0+
+Woocommerce 3.4.0+
+
+-- Installation ----------------------------------------------------------------
+
+1. Install the latest version Wordpress
+
+2. Install Woocommerce, go to your Wordpress Dashboard (admin login)
+   and click on 'Plugins'. Then click 'Add new' and search for 'Woocommerce'.
+   It will probably listed first as "WooCommerce - excelling eCommerce", click
+   on 'Install now'.
+
+3. Unzip the Digiwallet plugin. 
+
+4. Drag the folder 'digiwallet' to the /wp-content/plugins
+   of your Wordpress installation
+
+5. Go back to 'Plugins' and click 'Activate' below 'Digiwallet for Woocommerce'
+
+6. Now go to Woocommerce > Settings > Payment gateways
+
+7. If you don't have one, you can get a free Digiwallet account on
+   https://www.DigiWallet.com/
+
+   Furthermore, there are not set-up costs, monthly fees, payout fees, etc.
+
+8. Open the Tab 'digiwallet' and enter your outletid/layoutcode there.
+   Also, tabs for 'iDEAL', 'Bancontact' and 'Sofort Banking' etc have been added.
+   Open these too and activate the payment methods you like to include.
+
+9. You're good to go!
+
+   Note: you can switch the testmode on in your digiwallet enviroment.
+   You can simulate real payments.
+   Needless to say, but uncheck it again after testing, otherwise all your
+   merchandise will be offered for free...
+
+-- Contact ---------------------------------------------------------------------
+
+Distribution:	www.e-plugins.nl
+
+				Check here for more webshops plugins.
+                Missing anything? Mail to: e-plugins@targetmedia.eu
+
+Author:			e- plugins
+				Huizermaatweg 550
+				1276 LM Huizen
+            	www.e-plugins.nl
+
+                The software is provided 'as is'.
+                No (free) support is available.
+
+-- Released under GPLv3 --------------------------------------------------------
+
+Released under GPLv3, see LICENSE.TXT
+
