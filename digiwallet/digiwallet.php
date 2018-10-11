@@ -3,14 +3,13 @@
 /**
  * DigiWallet WooCommerce payment module
  *
- * @author DigiWallet.nl <techsupport@targetmedia.nl>
+ * @author <techsupport@targetmedia.nl>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (C) 2018 e-plugins.nl
  *
  * Plugin Name: DigiWallet for WooCommerce
- * Plugin URI: https://www.digiwallet.nl
+ * Plugin URI: https://www.e-plugins.nl
  * Description: Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in WooCommerce
- * Author: DigiWallet.nl
  * Author URI: https://www.digiwallet.nl
  * Version: 5.0.4
  * 10-09-2018 renaming from targetpay to digiwallet.
