@@ -12,7 +12,8 @@
  * Description: Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in WooCommerce
  * Author: DigiWallet.nl
  * Author URI: https://www.digiwallet.nl
- * Version: 5.0.4 - 10-09-2018 renaming from targetpay to digiwallet.
+ * Version: 5.0.4
+ * 10-09-2018 renaming from targetpay to digiwallet.
  */
 define('DIGIWALLET_TABLE_NAME', 'woocommerce_digiwallet');
 
