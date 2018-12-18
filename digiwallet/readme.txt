@@ -71,4 +71,3 @@ Initial release , complete renewed from targetpay
 
 == Upgrade Notice ==
 Please reinstall from previous versions (targetpay)
-renamed targetpay to digiwallet

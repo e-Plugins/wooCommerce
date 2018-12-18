@@ -30,7 +30,7 @@ class WC_Gateway_DigiWallet_Bankwire extends WC_Gateway_DigiWallet
     public function additionalParameters(WC_Order $order, DigiWalletCore $digiWallet)
     {
         $digiWallet->bindParam('salt', $this->salt);
-        $digiWallet->bindParam('email', $order->billing_email);
+        $digiWallet->bindParam('email', $order->get_billing_email());
         $digiWallet->bindParam('userip', $_SERVER["REMOTE_ADDR"]);
     }
     
@@ -58,7 +58,7 @@ class WC_Gateway_DigiWallet_Bankwire extends WC_Gateway_DigiWallet
      * Output for the order received page.
      */
     public function thankyou_page($order_id) {
-        $trxid = ! empty($_REQUEST['trxid']) ? esc_sql($_REQUEST['trxid']) : null;
+        $trxid = ! empty($_REQUEST['trxid']) ? wc_clean($_REQUEST['trxid']) : null;
         if($trxid) {
             $order = new WC_Order($order_id);
             $extOrder = $this->getExtOrder($order_id, $trxid);
@@ -72,15 +72,15 @@ class WC_Gateway_DigiWallet_Bankwire extends WC_Gateway_DigiWallet
                         <h4>Bedankt voor uw bestelling in onze webwinkel!</h4>
                         <p>
                             U ontvangt uw bestelling zodra we de betaling per bank ontvangen hebben. <br>
-                            Zou u zo vriendelijk willen zijn het totaalbedrag van € ' .  $order->order_total . ' over te maken op bankrekening <b>
-                    		' . $iban . ' </b> t.n.v. ' . $beneficiary. '* ?
+                            Zou u zo vriendelijk willen zijn het totaalbedrag van € ' .  esc_html($order->get_total()) . ' over te maken op bankrekening <b>
+                    		' . esc_html($iban) . ' </b> t.n.v. ' . esc_html($beneficiary) . '* ?
                         </p>
                         <p>
-                            Vermeld daarbij als betaalkenmerk <b>' . $trxid. '</b>, zodat de betaling automatisch verwerkt kan worden.
-                            Zodra dit gebeurd is ontvangt u een mail op ' . $order->billing_email . ' ter bevestiging.
+                            Vermeld daarbij als betaalkenmerk <b>' . esc_html($trxid) . '</b>, zodat de betaling automatisch verwerkt kan worden.
+                            Zodra dit gebeurd is ontvangt u een mail op ' . esc_html($order->get_billing_email()) . ' ter bevestiging.
                         </p>
                         <p>
-                            Mocht het nodig zijn voor betalingen vanuit het buitenland, dan is de BIC code van de bank ' . $bic . ' en de naam van de bank is ' . $bank . '.
+                            Mocht het nodig zijn voor betalingen vanuit het buitenland, dan is de BIC code van de bank ' . esc_html($bic) . ' en de naam van de bank is ' . esc_html($bank) . '.
                             Zorg ervoor dat u kiest voor kosten in het buitenland voor eigen rekening (optie: OUR), anders zal het bedrag wat binnenkomt te laag zijn.
                         <p>
                             <i>* De betalingen voor onze webwinkel worden verwerkt door TargetMedia. TargetMedia is gecertificeerd als Collecting Payment Service Provider door Currence.
@@ -92,12 +92,12 @@ class WC_Gateway_DigiWallet_Bankwire extends WC_Gateway_DigiWallet
                 echo '<div class="bankwire-info">
                     <h4>' . __('Thank you for ordering in our webshop!', 'digiwallet') . '</h4>
                     <p>' . __('You will receive your order as soon as we receive payment from the bank.', 'digiwallet') . 
-                    '<br>' . sprintf( __('Would you be so friendly to transfer the total amount of €%s to the bankaccount <b>%s</b> in name of %s * ?', 'digiwallet' ), $order->order_total, $iban, $beneficiary) .
+                    '<br>' . sprintf( __('Would you be so friendly to transfer the total amount of €%s to the bankaccount <b>%s</b> in name of %s * ?', 'digiwallet' ), esc_html($order->get_total()), esc_html($iban), esc_html($beneficiary) ) .
                     '</p>'.
-                    '<p>' . sprintf( __( 'State the payment feature <b>%s</b>, this way the payment can be automatically processed.', 'digiwallet' ), $trxid ) . 
-                    '<br>' . sprintf( __( 'As soon as this happens you shall receive a confirmation mail on %s.', 'digiwallet' ), $order->billing_email) . 
+                    '<p>' . sprintf( __( 'State the payment feature <b>%s</b>, this way the payment can be automatically processed.', 'digiwallet' ), esc_html($trxid) ) . 
+                    '<br>' . sprintf( __( 'As soon as this happens you shall receive a confirmation mail on %s.', 'digiwallet' ), esc_html($order->get_billing_email())) . 
                     '</p>' .
-                    '<p>' . sprintf( __( 'If it is necessary for payments abroad, then the BIC code from the bank %s and the name of the bank is %s.', 'digiwallet' ), $bic, $bank) . 
+                    '<p>' . sprintf( __( 'If it is necessary for payments abroad, then the BIC code from the bank %s and the name of the bank is %s.', 'digiwallet' ), esc_html($bic), esc_html($bank) ) . 
                     '<p>' . __('<i>* Payment for our webstore is processed by TargetMedia. TargetMedia is certified as a Collecting Payment Service Provider by Currence. This means we set the highest security standards when is comes to security of payment for you as a customer and us as a webshop.</i>', 'digiwallet') . 
                     '</p>
                 </div>';

@@ -59,7 +59,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         // After init_settings() is called, you can get the settings and load them into variables
         $this->init_settings();
         foreach ($this->settings as $setting_key => $value) {
-            $this->$setting_key = $value;
+            $this->$setting_key = wc_clean($value);
         }
         
         // check if method valid to show in FE
@@ -107,7 +107,8 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             // class will be used instead
             add_action('woocommerce_update_options_payment_gateways_' . $this->id, array(
                 $this, 
-                'process_admin_options'));
+                'process_admin_options'
+            ));
         }
     }
 
@@ -171,7 +172,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         
         $order = new WC_Order($order_id);
         $orderID = $order->get_id();
-        $amount = $order->order_total;
+        $amount = $order->get_total();
         if ($amount < $this->minAmount) {
             $message = sprintf(__('The total amount is lower than the minimum of %s euros for %s', 'digiwallet'), $this->minAmount, $this->payMethodName);
             wc_add_notice($message, $notice_type = 'error');
@@ -191,7 +192,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         $digiWallet = new DigiWalletCore($this->payMethodId, $this->rtlo, $this->language);
         $digiWallet->setAmount(round($amount * 100));
         $digiWallet->setDescription('Order ' . $order->get_order_number()); // $order->id
-                                                                           // set return & report & cancel url
+        // set return & report & cancel url
         $digiWallet->setReturnUrl(add_query_arg(array(
             'wc-api' => 'WC_Gateway_DigiWallet'. $this->payMethodId .'Return',
             'od' => $orderID
@@ -199,7 +200,8 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         
         $digiWallet->setReportUrl(add_query_arg(array(
             'wc-api' => 'WC_Gateway_DigiWallet' . $this->payMethodId . 'Report', 
-            'od' => $orderID), home_url('/')));
+            'od' => $orderID
+        ), home_url('/')));
         // Add additional parameters
         $this->additionalParameters($order, $digiWallet);
         
@@ -213,12 +215,12 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             return false;
         } else {
             $insert = $wpdb->insert($DigiWalletTable, array(
-                'cart_id' => $order->get_order_number(), 
-                'order_id' => $order->get_id(),
-                'rtlo' => $this->rtlo, 
-                'paymethod' => $this->payMethodId, 
-                'transaction_id' => $digiWallet->getTransactionId(), 
-                'more' => $digiWallet->getMoreInformation()), array(
+                'cart_id' => esc_sql($order->get_order_number()), 
+                'order_id' => esc_sql($order->get_id()),
+                'rtlo' => esc_sql($this->rtlo), 
+                'paymethod' => esc_sql($this->payMethodId), 
+                'transaction_id' => esc_sql($digiWallet->getTransactionId()), 
+                'more' => esc_sql($digiWallet->getMoreInformation())), array(
                 '%s', 
                 '%d', 
                 '%d', 
@@ -247,27 +249,27 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
     {
         global $woocommerce, $wpdb;
         
-        $orderId = ! empty($_REQUEST['od']) ? esc_sql($_REQUEST['od']) : null;
+        $orderId = ! empty($_REQUEST['od']) ? wc_clean($_REQUEST['od']) : null;
         switch ($this->payMethodId) {
             case 'AFP':
-                $trxid = esc_sql($_REQUEST['invoiceID']);
+                $trxid = wc_clean($_REQUEST['invoiceID']);
                 break;
             case 'PYP':
-                $trxid = esc_sql($_REQUEST['paypalid']);
+                $trxid = wc_clean($_REQUEST['paypalid']);
                 break;
             default:
-                $trxid = esc_sql($_REQUEST['trxid']);
+                $trxid = wc_clean($_REQUEST['trxid']);
         }
         if ($orderId && $trxid) {
             $order = new WC_Order($orderId);
             if ($order->post == null) {
-                echo 'Order ' . htmlentities($orderId) . ' not found... ';
+                echo 'Order ' . esc_html($orderId) . ' not found... ';
                 die();
             }
             $extOrder = $this->getExtOrder($orderId, $trxid);
             
             if ($extOrder == null) { // Oeps something wrong... Some extra debug information for Digiwallet
-                echo 'Sale not found...';
+                echo 'Transaction not found...';
                 die();
             }
             if (!in_array($order->get_status(), array_keys($this->list_success_status))) {//check order in return if status != success
@@ -275,7 +277,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             }
             $this->redirectAfterCheck($order, $trxid);
         }
-        echo 'Order ' . htmlentities($orderId) . ' not found... ';
+        echo 'Order ' . esc_html($orderId) . ' not found... ';
         die();
     }
 
@@ -288,16 +290,16 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
     public function check_digiwallet_report()
     {
         global $woocommerce, $wpdb;
-        $orderId = ! empty($_REQUEST['od']) ? esc_sql($_REQUEST['od']) : null;
+        $orderId = ! empty($_REQUEST['od']) ? wc_clean($_REQUEST['od']) : null;
         switch ($this->payMethodId) {
             case 'AFP':
-                $trxid = esc_sql($_REQUEST['invoiceID']);
+                $trxid = wc_clean($_REQUEST['invoiceID']);
                 break;
             case 'PYP':
-                $trxid = esc_sql($_REQUEST['acquirerID']);
+                $trxid = wc_clean($_REQUEST['acquirerID']);
                 break;
             default:
-                $trxid = esc_sql($_REQUEST['trxid']);
+                $trxid = wc_clean($_REQUEST['trxid']);
         }
 //         if ( substr($_SERVER['REMOTE_ADDR'],0,10) == "89.184.168" ||
 //             substr($_SERVER['REMOTE_ADDR'],0,9) == "78.152.58" ) {
@@ -309,13 +311,13 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
                 }
                 //Ignore updating Woo Order if Order Status is Paid (completed, processing)
                 if (in_array($order->get_status(), array_keys($this->list_success_status))) {
-                    echo "order $orderId had been done";
+                    echo "order " . esc_html($orderId) . " had been done";
                     die;
                 }
-                $log_msg = 'Prev status= ' . $order->get_status() . PHP_EOL;
+                $log_msg = 'Prev status= ' . esc_html($order->get_status()) . PHP_EOL;
                 $this->checkOrder($order, $extOrder);
-                $log_msg .= 'current status= ' . $order->get_status() . PHP_EOL;
-                $log_msg .= 'order number= ' . $orderId . PHP_EOL;
+                $log_msg .= 'current status= ' . esc_html($order->get_status()) . PHP_EOL;
+                $log_msg .= 'order number= ' . esc_html($orderId) . PHP_EOL;
                 $log_msg .= 'Version=wc 1.2.1';
                 
                 if(WP_DEBUG) {
@@ -353,7 +355,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             }
             do_action( 'woocommerce_payment_complete', $order->get_id());
         } else {
-            $this->updateDigiWalletTable($order, array('message' => $digiWallet->getErrorMessage()));
+            $this->updateDigiWalletTable($order, array('message' => esc_sql($digiWallet->getErrorMessage())));
             $order->update_status(self::WOO_ORDER_STATUS_FAILED, "Method {$order->get_payment_method_title()}(Transaction ID $extOrder->transaction_id): ");
         }
         return $order;
@@ -388,7 +390,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         global $wpdb;
         $DigiWalletTable = $this->getDigiWalletTableName();
         return $wpdb->update($DigiWalletTable, $data, array(
-            'order_id' => $order->get_id()));
+            'order_id' => esc_sql($order->get_id())));
     }
 
     /**
@@ -447,7 +449,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
     {
         global $wpdb;
         $DigiWalletTable = $this->getDigiWalletTableName();
-        $sql = 'SELECT * FROM ' . $DigiWalletTable . " WHERE `order_id` = '" . $orderId . "' AND `transaction_id` = '" . $trxid . "' ORDER BY `id` DESC";
+        $sql = 'SELECT * FROM ' . $DigiWalletTable . " WHERE `order_id` = '" . esc_sql($orderId) . "' AND `transaction_id` = '" . esc_sql($trxid) . "' ORDER BY `id` DESC";
         return $wpdb->get_row($sql, OBJECT);
     }
 
@@ -479,20 +481,22 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         $settings = ob_get_contents();
         ob_end_clean();
         if ($this->is_valid_for_use()) {
+            $logoDw = plugins_url('../', __FILE__) . '/assets/images/admin_header.png';
+            $logoPayMethod = plugins_url('../', __FILE__) . '/assets/images/' . $this->payMethodId . '_60.png';
             $template = '<table class="form-table">
                  <div class="tp-method-conf">
                     <div class="tp-icon">
-                    <img src="' . plugins_url('../', __FILE__) . '/assets/images/admin_header.png">
+                    <img src="' . esc_attr($logoDw) .'">
                     </div>
                     <div class="tp-icon-method">
-                    <img src="' . plugins_url('../', __FILE__) . '/assets/images/' . $this->payMethodId . '_60.png">
+                    <img src="' . esc_attr($logoPayMethod) .'">
                     </div>
                 </div>';
-            $template .= '<div class="inline description"><p><strong>' . $this->method_description . '</strong></p></div>';
+            $template .= '<div class="inline description"><p><strong>' . esc_html($this->method_description) . '</strong></p></div>';
             $template .= $settings;
             $template .= '</table>';
         } else {
-            $template = '<div class="inline error"><p><strong>' . __('Gateway Disabled', 'woocommerce') . '</strong>: ' . $this->enabledErrorMessage . '</p></div>';
+            $template = '<div class="inline error"><p><strong>' . __('Gateway Disabled', 'woocommerce') . '</strong>: ' . esc_html($this->enabledErrorMessage) . '</p></div>';
         }
         echo $template;
     }
@@ -597,7 +601,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             if (empty(self::$log)) {
                 self::$log = wc_get_logger();
             }
-            self::$log->log($level, $message, array(
+            self::$log->log($level, wc_clean($message), array(
                 'source' => 'digiwallet'));
         }
     }

@@ -181,7 +181,7 @@ class WC_Gateway_DigiWallet_Afterpay extends WC_Gateway_DigiWallet
         if(method_exists('WC_Gateway_DigiWallet_Afterpay', $function)) {
             return self::$function($phone);
         } else {
-            echo "unknown phone formatter for country: ". $function;
+            echo "unknown phone formatter for country: ". esc_html($function);
             exit;
         }
         return $phone;

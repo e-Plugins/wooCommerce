@@ -14,7 +14,7 @@ class WC_Gateway_DigiWallet_Sofort extends WC_Gateway_DigiWallet
     public function additionalParameters(WC_Order $order, DigiWalletCore $digiWallet)
     {
         if (isset($_POST["country"])) {
-            $digiWallet->setCountryId($_POST["country"]);
+            $digiWallet->setCountryId(wc_clean($_POST["country"]));
         }
     }
     
@@ -31,7 +31,7 @@ class WC_Gateway_DigiWallet_Sofort extends WC_Gateway_DigiWallet
         $temp = $digiWallet->getCountryList();
         $html .= '<select name="country" style="width:220px; padding: 2px; margin-left: 7px">';
         foreach ($temp as $key => $value) {
-            $html .= '<option value="'.$key.'">'.$value.'</option>';
+            $html .= '<option value="'.esc_attr($key).'">'.esc_html($value).'</option>';
         }
         $html .= '</select>';
         return $html;

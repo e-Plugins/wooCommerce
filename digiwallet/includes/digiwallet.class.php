@@ -129,7 +129,7 @@ class DigiWalletCore
                 $banks_array[$bank['attributes']['ID']] = $bank['value'];
             }
         }
-        return $banks_array;
+        return wc_clean($banks_array);
     }
     
     public function getCountryList()
@@ -195,10 +195,6 @@ class DigiWalletCore
             return false;
         }
 
-        $this->returnUrl = str_replace("%payMethod%", $this->payMethod, $this->returnUrl);
-        $this->cancelUrl = str_replace("%payMethod%", $this->payMethod, $this->cancelUrl);
-        $this->reportUrl = str_replace("%payMethod%", $this->payMethod, $this->reportUrl);
-        
         $url = $this->startAPIs[$this->payMethod];
         switch ($this->payMethod) {
             case 'IDE':
@@ -244,18 +240,19 @@ class DigiWalletCore
             error_log($url);
         }
         
-        $result = $this->httpRequest($url);
+        $result = wc_clean($this->httpRequest($url));
         $result_code = substr($result, 0, 6);
         if (($result_code == "000000") || ($result_code == "000001" && $this->payMethod == "CC")) {
             $result = substr($result, 7);
             if ($this->payMethod == 'AFP') {
-                list($this->transactionId, $status, $this->bankUrl) = explode("|", $result);
+                list($transactionId, $status, $bankUrl) = explode("|", $result);
             } else {
-                list($this->transactionId, $this->bankUrl) = explode("|", $result);
+                list($transactionId, $bankUrl) = explode("|", $result);
             }
-            
+            $this->setTransactionId($transactionId);
+            $this->setBankUrl($bankUrl);
             if ($this->payMethod == 'BW') {
-                $this->moreInformation = $result;
+                $this->setMoreInformation($result);
                 return true;
             }
             return $this->bankUrl;
@@ -314,8 +311,8 @@ class DigiWalletCore
         if (trim($resultCode) == "000000 OK" && is_numeric($additionalParam1) && is_numeric($additionalParam2)) {
             // BankWire response
             $this->paidStatus = true;
-            $this->bankwireAmountDue = (int)$additionalParam1;
-            $this->bankwireAmountPaid = (int)$additionalParam2;
+            $this->bankwireAmountDue = wc_clean($additionalParam1);
+            $this->bankwireAmountPaid = wc_clean($additionalParam2);
 
             return true;
         }
@@ -327,7 +324,10 @@ class DigiWalletCore
         }
 
         $this->paidStatus = false;
-        $this->errorMessage = $strResult;
+        if ($this->payMethod == "AFP")
+            $this->errorMessage = $additionalParam2 . ' - ' . 'Something went wrong with the AfterPay transaction.We apologize for the inconvenience.';
+        else
+            $this->errorMessage = $strResult;
 
         return false;
     }
@@ -363,40 +363,17 @@ class DigiWalletCore
         curl_close($ch);
         return $result;
     }
-
-    /**
-     *  GETTERS & SETTERS
-     */
-
-    public function setAmount($amount)
-    {
-        $this->amount = round($amount);
-        return true;
-    }
-
+    
     /**
      * Bind additional parameter to start request. Safe for chaining.
      */
-
+    
     public function bindParam($name, $value)
     {
         $this->parameters[$name] = $value;
         return $this;
     }
 
-    public function getAmount()
-    {
-        return $this->amount;
-    }
-    
-    
-    
-    public function setBankId($bankId)
-    {
-        $this->bankId = $bankId;
-        return true;
-    }
-    
     public function getTax($rate = null)
     {
         if(empty($rate)) return 4; // No tax
@@ -404,25 +381,58 @@ class DigiWalletCore
         else if($rate>= 6) return 2;
         else return 3;
     }
-    
+
+    /**
+     *  GETTERS & SETTERS
+     */
+
+    public function setAmount($amount)
+    {
+        $this->amount = wc_clean($amount);
+        return true;
+    }
+
+    public function getAmount()
+    {
+        return $this->amount;
+    }
+
+    public function setBankId($bankId)
+    {
+        $this->bankId = wc_clean($bankId);
+        return true;
+    }
+
     public function getBankId()
     {
         return $this->bankId;
+    }
+
+    public function setBankUrl($bankUrl)
+    {
+        $this->bankUrl = esc_url_raw($bankUrl);
+        return true;
     }
 
     public function getBankUrl()
     {
         return $this->bankUrl;
     }
-    
+
+    public function setMoreInformation($moreInformation)
+    {
+        $this->moreInformation = wc_clean($moreInformation);
+        return true;
+    }
+
     public function getMoreInformation()
     {
         return $this->moreInformation;
     }
-    
+
     public function setCountryId($countryId)
     {
-        $this->countryId = strtolower(substr($countryId, 0, 2));
+        $this->countryId = wc_clean(strtolower(substr($countryId, 0, 2)));
         return true;
     }
 
@@ -433,13 +443,69 @@ class DigiWalletCore
 
     public function setDescription($description)
     {
-        $this->description = substr($description, 0, 32);
+        $this->description = wc_clean(substr($description, 0, 32));
         return true;
     }
 
     public function getDescription()
     {
         return $this->description;
+    }
+
+    public function setReportUrl($reportUrl)
+    {
+        if (preg_match('|(\w+)://([^/:]+)(:\d+)?(.*)|', $reportUrl)) {
+            $this->reportUrl = esc_url_raw($reportUrl);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getReportUrl()
+    {
+        return $this->reportUrl;
+    }
+
+    public function setReturnUrl($returnUrl)
+    {
+        if (preg_match('|(\w+)://([^/:]+)(:\d+)?(.*)|', $returnUrl)) {
+            $this->returnUrl = esc_url_raw($returnUrl);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getReturnUrl()
+    {
+        return $this->returnUrl;
+    }
+
+    public function setCancelUrl($cancelUrl)
+    {
+        if (preg_match('|(\w+)://([^/:]+)(:\d+)?(.*)|', $cancelUrl)) {
+            $this->cancelUrl = esc_url_raw($cancelUrl);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public function getCancelUrl()
+    {
+        return $this->cancelUrl;
+    }
+
+    public function setTransactionId($transactionId)
+    {
+        $this->transactionId = wc_clean(substr($transactionId, 0, 32));
+        return true;
+    }
+
+    public function getTransactionId()
+    {
+        return $this->transactionId;
     }
 
     public function getErrorMessage()
@@ -454,7 +520,7 @@ class DigiWalletCore
                 $returnVal = $this->errorMessage;
             }
         }
-        return $returnVal;
+        return wc_clean($returnVal);
     }
 
     public function getLanguage($allowList = false, $defaultLanguage = false)
@@ -480,70 +546,14 @@ class DigiWalletCore
         return $this->payMethod;
     }
 
-    public function setReportUrl($reportUrl)
-    {
-        if (preg_match('|(\w+)://([^/:]+)(:\d+)?(.*)|', $reportUrl)) {
-            $this->reportUrl = $reportUrl;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function getReportUrl()
-    {
-        return $this->reportUrl;
-    }
-
-    public function setReturnUrl($returnUrl)
-    {
-        if (preg_match('|(\w+)://([^/:]+)(:\d+)?(.*)|', $returnUrl)) {
-            $this->returnUrl = $returnUrl;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function getReturnUrl()
-    {
-        return $this->returnUrl;
-    }
-
-    public function setCancelUrl($cancelUrl)
-    {
-        if (preg_match('|(\w+)://([^/:]+)(:\d+)?(.*)|', $cancelUrl)) {
-            $this->cancelUrl = $cancelUrl;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public function getCancelUrl()
-    {
-        return $this->cancelUrl;
-    }
-
-    public function setTransactionId($transactionId)
-    {
-        $this->transactionId = substr($transactionId, 0, 32);
-        return true;
-    }
-
-    public function getTransactionId()
-    {
-        return $this->transactionId;
-    }
-
     public function getBankwireAmountDue()
     {
-        return $this->bankwireAmountDue;
+        return wc_clean($this->bankwireAmountDue);
     }
 
     public function getBankwireAmountPaid()
     {
-        return $this->bankwireAmountPaid;
+        return wc_clean($this->bankwireAmountPaid);
     }
 
     /**

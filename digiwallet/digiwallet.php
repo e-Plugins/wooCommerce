@@ -3,16 +3,16 @@
 /**
  * DigiWallet WooCommerce payment module
  *
- * @author <techsupport@targetmedia.nl>
+ * @author DigiWallet.nl <techsupport@targetmedia.nl>
  * @license http://opensource.org/licenses/GPL-3.0 GNU General Public License, version 3 (GPL-3.0)
  * @copyright Copyright (C) 2018 e-plugins.nl
  *
  * Plugin Name: DigiWallet for WooCommerce
- * Plugin URI: https://www.e-plugins.nl
+ * Plugin URI: https://www.digiwallet.nl
  * Description: Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in WooCommerce
+ * Author: DigiWallet.nl
  * Author URI: https://www.digiwallet.nl
- * Version: 5.0.4
- * 10-09-2018 renaming from targetpay to digiwallet.
+ * Version: 5.0.4 - 10-09-2018 BankWire behavior and various fixes
  */
 define('DIGIWALLET_TABLE_NAME', 'woocommerce_digiwallet');
 
@@ -31,35 +31,35 @@ register_activation_hook(__FILE__, array(
 /**
  * Hook refund action from CMS
  *
- * @param unknown $refund_id            
- * @param unknown $order_id            
+ * @param unknown $refund_id
+ * @param unknown $order_id
  */
-function tm_woocommerce_refund_deleted($refund_id, $order_id)
+function digiwallet_woocommerce_refund_deleted($refund_id, $order_id)
 {
     $order = wc_get_order($order_id);
     
-    $tmGateway = new WC_Gateway_DigiWallet_Bancontact();
-    if (! $tmGateway->can_refund_order($order)) {
-        $tmGateway->log('Refund Failed: No transaction ID.', 'error');
+    $dwGateway = new WC_Gateway_DigiWallet_Bancontact();
+    if (! $dwGateway->can_refund_order($order)) {
+        $dwGateway->log('Refund Failed: No transaction ID.', 'error');
         wp_die();
     }
     
-    $extOrder = $tmGateway->getExtOrder($order_id, $order->get_transaction_id());
+    $extOrder = $dwGateway->getExtOrder($order_id, $order->get_transaction_id());
     
     $digiWallet = new DigiWalletCore($extOrder->paymethod, $extOrder->rtlo);
     
-    if (! $digiWallet->deleteRefund($tmGateway->token, $extOrder->paymethod, $order->get_transaction_id())) {
-        $tmGateway->log('Delete Refund Failed API: #refund_id:' . $refund_id . ' #Reasons' . $digiWallet->getErrorMessage(), 'error');
+    if (! $digiWallet->deleteRefund($dwGateway->token, $extOrder->paymethod, $order->get_transaction_id())) {
+        $dwGateway->log('Delete Refund Failed API: #refund_id:' . $refund_id . ' #Reasons' . $digiWallet->getErrorMessage(), 'error');
         $order->add_order_note('Delete Refund Failed API: #refund_id:' . $refund_id . ' #Reasons' . $digiWallet->getErrorMessage() . '<br>#This refund operation might need to perform manually');
     }
 }
 
-add_action('woocommerce_refund_deleted', 'tm_woocommerce_refund_deleted', 10, 2);
-add_action('plugins_loaded', 'init_digiwallet_class', 0);
-add_action('plugins_loaded', 'wan_load_textdomain');
-add_action( 'admin_enqueue_scripts', 'admin_enqueue_scripts');
+add_action('woocommerce_refund_deleted', 'digiwallet_woocommerce_refund_deleted', 10, 2);
+add_action('plugins_loaded', 'digiwallet_init_class', 0);
+add_action('plugins_loaded', 'digiwallet_load_textdomain');
+add_action('admin_enqueue_scripts', 'digiwallet_admin_enqueue_scripts');
 
-function init_digiwallet_class()
+function digiwallet_init_class()
 {
     // If the parent WC_Payment_Gateway class doesn't exist
     // it means WooCommerce is not installed on the site
@@ -86,10 +86,10 @@ function init_digiwallet_class()
     
     // Now that we have successfully included our class,
     // Lets add it too WooCommerce
-    add_filter('woocommerce_payment_gateways', 'add_target_payment_gateway');
+    add_filter('woocommerce_payment_gateways', 'add_digiwallet_payment_gateway');
 }
 
-function add_target_payment_gateway($methods)
+function add_digiwallet_payment_gateway($methods)
 {
     $methods[] = 'WC_Gateway_DigiWallet_iDEAL';
     $methods[] = 'WC_Gateway_DigiWallet_Bancontact';
@@ -103,10 +103,10 @@ function add_target_payment_gateway($methods)
     return $methods;
 }
 
-function admin_enqueue_scripts() {
-    wp_enqueue_style( 'wc-gateway-target-pay', plugin_dir_url( __FILE__ ) . '/assets/css/digiwallet_admin.css' );
+function digiwallet_admin_enqueue_scripts() {
+    wp_enqueue_style( 'wc-gateway-digiwallet', plugin_dir_url( __FILE__ ) . '/assets/css/digiwallet_admin.css' );
 }
 
-function wan_load_textdomain() {
+function digiwallet_load_textdomain() {
     load_plugin_textdomain( 'digiwallet', false, dirname( plugin_basename(__FILE__) ) . '/languages/' );
 }

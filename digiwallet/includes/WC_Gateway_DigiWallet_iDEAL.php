@@ -68,7 +68,7 @@ class WC_Gateway_DigiWallet_iDEAL extends WC_Gateway_DigiWallet
     public function additionalParameters(WC_Order $order, DigiWalletCore $digiWallet)
     {
         if (isset($_POST["bank"])) {
-            $digiWallet->setBankId($_POST["bank"]);
+            $digiWallet->setBankId(wc_clean($_POST["bank"]));
         }
     }
 
@@ -85,13 +85,13 @@ class WC_Gateway_DigiWallet_iDEAL extends WC_Gateway_DigiWallet
         $temp = $digiWallet->getBankList();
         if (isset($this->idealView) && $this->idealView == 'yes') {
             foreach ($temp as $key => $value) {
-                $html .= '<input type="radio" name="bank" id="'. $key . '" value="'. $key .
-                '"><label for="'.$key.'">'.__($value, 'digiwallet').'</label><br />';
+                $html .= '<input type="radio" name="bank" id="'. esc_attr($key) . '" value="'. esc_attr($key) .
+                '"><label for="'.esc_attr($key).'">'.esc_html($value).'</label><br />';
             }
         } else {
             $html .= '<select name="bank" style="width:170px; padding: 2px; margin-left: 7px">';
             foreach ($temp as $key => $value) {
-                $html .= '<option value="'.$key.'">'.__($value, 'digiwallet').'</option>';
+                $html .= '<option value="'.esc_attr($key).'">'.esc_html($value).'</option>';
             }
             $html .= '</select>';
         }
