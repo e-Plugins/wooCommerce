@@ -5,11 +5,11 @@
  * @author   digiwallet.nl
  * @url      http://www.e-plugins.nl
  * @release  21-09-2018
- * @ver      5.0.4
+ * @ver      5.0.5
  *
  * Changes:
  *
- * v5.0.4     Switched from targetpay to digiwallet
+ * v5.0.5     	replace CUrl by WP_Http 
  */
 
 /**
@@ -20,7 +20,7 @@ class DigiWalletCore
 {
     // Constants
 
-    const APP_ID = 'dw_woocommerce3.x_5.0.4';
+    const APP_ID = 'dw_woocommerce3.x_5.0.5';
 
     const MIN_AMOUNT            = 84;
 
@@ -348,20 +348,15 @@ class DigiWalletCore
      *  PRIVATE FUNCTIONS
      */
 
-    protected function httpRequest($url, $method = "GET")
+    protected function httpRequest($url)
     {
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        if ($method=="POST") {
-            curl_setopt($ch, CURLOPT_POST, 1);
+        $request = new WP_Http;
+        $result = $request->request( $url );
+        if (isset($result->errors)) {
+            $this->errorMessage = 'Something went wrong with Digiwallet API';
+            return false;
         }
-        $result = curl_exec($ch);
-        curl_close($ch);
-        return $result;
+        return $result['body'];
     }
     
     /**
@@ -564,36 +559,24 @@ class DigiWalletCore
      */
     public function refund($token, $dataRefund)
     {
-        $curl = curl_init();
-    
-        $data = http_build_query($dataRefund) . "\n";
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://api.digiwallet.nl/refund",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "POST",
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => $data,
-            CURLOPT_HTTPHEADER => array(
-                "authorization: Bearer " . $token,
-                "cache-control: no-cache"
-            )
-        ));
-    
-        $response = curl_exec($curl);
-    
-        curl_close($curl);
-    
-        $response = json_decode($response);
+        $url = 'https://api.digiwallet.nl/refund';
+        $request = new WP_Http();
+        $response_full = $request->request($url, array('method' => 'POST', 'body' => $data, 'headers' => array(
+            "authorization: Bearer " . $token,
+            "cache-control: no-cache"
+        )));
+        if (isset($response_full->errors)) {
+            $this->errorMessage = 'Something went wrong with Digiwallet API';
+            return false;
+        }
+        
+        $response = json_decode($response_full['body']);
         if(!empty($response->refundID) && $response->refundID > 0) {
             return true;
         }
         else {
             $this->errorMessage = (!empty($response->status) ? 'Error status: ' . $response->status . ' - ' : '') . $response->message;
-    
+            
             if (! empty($response->errors)) {
                 $arrError = [];
                 foreach ($response->errors as $errors) {
@@ -604,15 +587,15 @@ class DigiWalletCore
                 $errorMsg = implode("\n", $arrError);
                 $this->errorMessage .= ":\n" . $errorMsg;
             }
-    
+            
             return false;
         }
-    
+        
         return false;
     }
     
     /**
-     * 
+     *
      * @param unknown $token
      * @param unknown $method
      * @param unknown $trxid
@@ -620,27 +603,19 @@ class DigiWalletCore
      */
     public function deleteRefund($token, $method, $trxid)
     {
-        $curl = curl_init();
+        $url = "https://api.digiwallet.nl/refund/$method/$trxid";
+        $request = new WP_Http();
+        $response_full = $request->request($url, array('method' => 'DELETE', 'headers' => array(
+            "authorization: Bearer " . $token,
+            "cache-control: no-cache"
+        )));
         
-        curl_setopt_array($curl, array(
-            CURLOPT_URL => "https://api.digiwallet.nl/refund/$method/$trxid",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_ENCODING => "",
-            CURLOPT_MAXREDIRS => 10,
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-            CURLOPT_CUSTOMREQUEST => "DELETE",
-            CURLOPT_POST => '',
-            CURLOPT_HTTPHEADER => array(
-                "authorization: Bearer " . $token,
-                "cache-control: no-cache"
-            )
-        ));
+        if (isset($response_full->errors)) {
+            $this->errorMessage = 'Something went wrong with Digiwallet API';
+            return false;
+        }
         
-        $response = curl_exec($curl);
-        curl_close($curl);
-        
-        $response = json_decode($response);
+        $response = json_decode($response_full['body']);
         if(!empty($response->status)) {
             $this->errorMessage =  'Error status: ' . $response->status . ' - ' . $response->message;
         }
