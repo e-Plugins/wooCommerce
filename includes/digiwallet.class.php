@@ -20,7 +20,7 @@ class DigiWalletCore
 {
     // Constants
 
-    const APP_ID = 'dw_woocommerce3.x_5.0.5';
+    const APP_ID = 'dw_woocommerce3.x_5.0.6';
 
     const MIN_AMOUNT            = 84;
 
