@@ -216,6 +216,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         } else {
             $insert = $wpdb->insert($DigiWalletTable, array(
                 'cart_id' => esc_sql($order->get_order_number()), 
+                'site_id' => get_current_blog_id(),
                 'order_id' => esc_sql($order->get_id()),
                 'rtlo' => esc_sql($this->rtlo), 
                 'paymethod' => esc_sql($this->payMethodId), 
@@ -390,6 +391,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         global $wpdb;
         $DigiWalletTable = $this->getDigiWalletTableName();
         return $wpdb->update($DigiWalletTable, $data, array(
+            'site_id' => get_current_blog_id(),
             'order_id' => esc_sql($order->get_id())));
     }
 
@@ -436,7 +438,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
     {
         global $wpdb;
         
-        return $wpdb->prefix . DIGIWALLET_TABLE_NAME;
+        return $wpdb->base_prefix . DIGIWALLET_TABLE_NAME;
     }
 
     /**
@@ -449,7 +451,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
     {
         global $wpdb;
         $DigiWalletTable = $this->getDigiWalletTableName();
-        $sql = 'SELECT * FROM ' . $DigiWalletTable . " WHERE `order_id` = '" . esc_sql($orderId) . "' AND `transaction_id` = '" . esc_sql($trxid) . "' ORDER BY `id` DESC";
+        $sql = 'SELECT * FROM ' . $DigiWalletTable . " WHERE `site_id` = '" . get_current_blog_id() . "' AND `order_id` = '" . esc_sql($orderId) . "' AND `transaction_id` = '" . esc_sql($trxid) . "' ORDER BY `id` DESC";
         return $wpdb->get_row($sql, OBJECT);
     }
 
@@ -515,6 +517,7 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             $dbColums = $wpdb->get_col('DESC ' . $DigiWalletTable, 0);
             $requiredColumns = array(
                 'id', 
+                'site_id',
                 'cart_id', 
                 'order_id', 
                 'rtlo', 

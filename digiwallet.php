@@ -12,13 +12,9 @@
  * Description: Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in WooCommerce
  * Author: DigiWallet.nl
  * Author URI: https://www.digiwallet.nl
- * Version: 5.0.5
+ * Version: 5.0.6 - 7-3-2019 fix plugin in case active WP Multisite 
  */
 define('DIGIWALLET_TABLE_NAME', 'woocommerce_digiwallet');
-
-if (! in_array('woocommerce/woocommerce.php', apply_filters('active_plugins', get_option('active_plugins')))) {
-    return;
-}
 
 if (! class_exists('DigiWalletInstall')) {
     require_once (realpath(dirname(__FILE__)) . '/includes/install.php');
@@ -26,7 +22,17 @@ if (! class_exists('DigiWalletInstall')) {
 // create db when active plugin
 register_activation_hook(__FILE__, array(
     'DigiWalletInstall', 
-    'install_db'));
+    'install_db')
+);
+
+/**
+ * WooCommerce fallback notice.
+ *
+ * @return string
+ */
+function woocommerce_digiwallet_missing_wc_notice() {
+    echo '<div class="error"><p><strong>DigiWallet for WooCommerce requires WooCommerce to be installed and active</strong></p></div>';
+}
 
 /**
  * Hook refund action from CMS
@@ -65,6 +71,7 @@ function digiwallet_init_class()
     // it means WooCommerce is not installed on the site
     // so do nothing
     if (! class_exists('WC_Payment_Gateway')) {
+        add_action( 'admin_notices', 'woocommerce_digiwallet_missing_wc_notice' );
         return;
     }
     
