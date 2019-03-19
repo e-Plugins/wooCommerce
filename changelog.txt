@@ -2,3 +2,4 @@
 5.0.4	21-9-2018		moved to digiwallet, adjusted text info and removed ssl warnings.
 5.0.5	15-1-2019		replace CUrl with WP_Http 
 5.0.6   7-3-2019        fix plugin in case active WP Multisite
+5.0.7   19-3-2019       execute query when plugin update complete
