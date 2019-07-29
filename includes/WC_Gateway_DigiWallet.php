@@ -202,6 +202,11 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
             'wc-api' => 'WC_Gateway_DigiWallet' . $this->payMethodId . 'Report', 
             'od' => $orderID
         ), home_url('/')));
+        //Add consumer email
+        $consumerEmail = $this->getConsumerEmail($order);
+        if ($consumerEmail) {
+            $digiWallet->bindParam('email', $consumerEmail);
+        }
         // Add additional parameters
         $this->additionalParameters($order, $digiWallet);
         
@@ -658,6 +663,24 @@ abstract class WC_Gateway_DigiWallet extends WC_Payment_Gateway
         }
         
         return true;
+    }
+
+    /**
+     * Get consumer email
+     * login user => user email, guest => billing_email
+     * 
+     * @param int WC_Order $order
+     * @return string
+     */
+    private function getConsumerEmail(WC_Order $order)
+    {
+        if ( $order->get_user_id() ) {
+            $user_id = absint( $order->get_user_id() );
+            $user    = get_user_by( 'id', $user_id );
+            return $user->user_email;
+        } else {
+            return $order->billing_email;
+        }
     }
 
     abstract protected function getDigiWalletMethodOption();

@@ -5,7 +5,7 @@
  * @author   digiwallet.nl
  * @url      http://www.e-plugins.nl
  * @release  21-09-2018
- * @ver      5.0.5
+ * @ver      5.0.8
  *
  * Changes:
  *
@@ -20,7 +20,7 @@ class DigiWalletCore
 {
     // Constants
 
-    const APP_ID = 'dw_woocommerce3.x_5.0.7';
+    const APP_ID = 'dw_woocommerce3.x_5.0.9';
 
     const MIN_AMOUNT            = 84;
 

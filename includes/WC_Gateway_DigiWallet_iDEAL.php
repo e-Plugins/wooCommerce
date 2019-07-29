@@ -90,6 +90,7 @@ class WC_Gateway_DigiWallet_iDEAL extends WC_Gateway_DigiWallet
             }
         } else {
             $html .= '<select name="bank" style="width:170px; padding: 2px; margin-left: 7px">';
+            $html .= '<option value="">'.__('Select a bank', 'digiwallet').'</option>';
             foreach ($temp as $key => $value) {
                 $html .= '<option value="'.esc_attr($key).'">'.esc_html($value).'</option>';
             }

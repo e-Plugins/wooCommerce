@@ -30,6 +30,7 @@ class WC_Gateway_DigiWallet_Sofort extends WC_Gateway_DigiWallet
         $digiWallet = new DigiWalletCore($this->payMethodId);
         $temp = $digiWallet->getCountryList();
         $html .= '<select name="country" style="width:220px; padding: 2px; margin-left: 7px">';
+        $html .= '<option value="">'.__('Select a country', 'digiwallet').'</option>';
         foreach ($temp as $key => $value) {
             $html .= '<option value="'.esc_attr($key).'">'.esc_html($value).'</option>';
         }

@@ -11,8 +11,9 @@
  * Plugin URI: https://www.digiwallet.nl
  * Description: Activates iDEAL, Bancontact, Sofort Banking, Visa / Mastercard Credit cards, PaysafeCard, AfterPay, BankWire, PayPal and Refunds in WooCommerce
  * Author: DigiWallet.nl
+ * Text Domain: digiwallet
  * Author URI: https://www.digiwallet.nl
- * Version: 5.0.7 - 19-3-2019 execute query when plugin loaded
+ * Version: 5.0.9 - 15-7-2019 Minor bug fixes and URL update
  */
 define('DIGIWALLET_TABLE_NAME', 'woocommerce_digiwallet');
 
