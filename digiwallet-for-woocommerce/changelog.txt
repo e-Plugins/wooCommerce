@@ -1,0 +1,7 @@
+5.0.3 	10-9-2018 		modified refunds, removed problem with decimal place.
+5.0.4	21-9-2018		moved to digiwallet, adjusted text info and removed ssl warnings.
+5.0.5	15-1-2019		replace CUrl with WP_Http 
+5.0.6   7-3-2019        fix plugin in case active WP Multisite
+5.0.7   19-3-2019       execute query when plugin loaded
+5.0.8   25-4-2019       set default select bank|country to blank & update translation
+5.0.9   15-7-2019       Minor bug fixes and URL update
