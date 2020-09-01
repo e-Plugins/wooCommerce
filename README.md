@@ -1,4 +1,4 @@
-# DigiWallet plugin for Woocommerce
+# iDEAL plugin for WooCommerce
 
 ## Usage
 Use this plugin to add support for iDEAL, Bancontact, Sofort, Credit cards, Paysafecard, Afterpay, Bankwire, Refunds
