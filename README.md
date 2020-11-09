@@ -1,7 +1,7 @@
-# iDEAL plugin for WooCommerce
+# digiwallet plugin for Woocommerce
 
 ## Usage
-Use this plugin to add support for iDEAL, Bancontact, Sofort, Credit cards, Paysafecard, Afterpay, Bankwire, Refunds
+Use this plugin to add support for iDEAL, Bancontact, Sofort, GiroPay, EPS, Credit cards, Paysafecard, Afterpay, Bankwire, Refunds
 from Digiwallet.nl to your webstore. 
 
 ## Supported Paymethods
@@ -11,9 +11,9 @@ from Digiwallet.nl to your webstore.
 | Bancontact	|:heavy_check_mark:	|
 | Creditcard	|:heavy_check_mark:	|
 | Paysafecard	|:heavy_check_mark:	|
-| Sofort	|:heavy_check_mark:	|
 | GiroPay	|:heavy_check_mark:	|
 | EPS	|:heavy_check_mark:	|
+| Sofort	|:heavy_check_mark:	|
 | Paypal	|:heavy_check_mark:	|
 | Afterpay	|:heavy_check_mark:	|
 | Bankwire	|:heavy_check_mark:	|
@@ -22,7 +22,7 @@ from Digiwallet.nl to your webstore.
 
 ## Installation
 
-### 1. Set up a DigiWallet account
+### 1. Set up a Digiwallet account
 Before you can use the plugin, please sign up for a DigiWallet account on www.digiwallet.nl
 
 Note that the plugin can be used in a live environment only after it has been completed with your details and
