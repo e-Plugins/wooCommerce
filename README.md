@@ -1,4 +1,4 @@
-# digiwallet plugin for Woocommerce
+# DigiWallet plugin for Woocommerce
 
 ## Usage
 Use this plugin to add support for iDEAL, Bancontact, Sofort, GiroPay, EPS, Credit cards, Paysafecard, Afterpay, Bankwire, Refunds
@@ -22,7 +22,7 @@ from Digiwallet.nl to your webstore.
 
 ## Installation
 
-### 1. Set up a Digiwallet account
+### 1. Set up a DigiWallet account
 Before you can use the plugin, please sign up for a DigiWallet account on www.digiwallet.nl
 
 Note that the plugin can be used in a live environment only after it has been completed with your details and
