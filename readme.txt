@@ -2,7 +2,7 @@
 Contributors: idealplugins, eplugin
 Tags: Digiwallet ,ideal , sofort, Bancontact, Paysafecard , Credit card, Maestro, Visa, paypal,  eplugins , targetpay , overboekingen
 Requires at least: 4.9.8
-Tested up to: 6.
+Tested up to: WC 7.1 with Wordpress 6.1
 Requires PHP: 5.6
 Stable tag: Master
 License: GPLv3 or later
